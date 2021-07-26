@@ -6,7 +6,7 @@ const InternalServerError = require('../errors/InternalServerError');
 const ConflicRequest = require('../errors/ConflicRequest');
 const Unauthorized = require('../errors/Unauthorized');
 const User = require('../models/user');
-const JWT_SECRET = require('../configs/index');
+const { JWT_SECRET } = require('../configs/index');
 
 const getUsers = (req, res) => {
   User.find({})
@@ -55,7 +55,8 @@ const createUser = (req, res, next) => {
         .then((hash) => User.create({
           name, about, avatar, email, password: hash,
         }))
-        .then((newUser) => res.status(200).send(newUser))
+        // eslint-disable-next-line no-shadow
+        .then(({ _id, email }) => res.status(200).send({ _id, email }))
         .catch((err) => {
           throw new InternalServerError(`Ошибка - ${err.message}`);
         })

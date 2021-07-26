@@ -2,6 +2,7 @@ const NotFoundError = require('../errors/NotFoundError');
 const FaultRequest = require('../errors/FaultRequest');
 const InternalServerError = require('../errors/InternalServerError');
 const Card = require('../models/card');
+const Forbidden = require('../errors/Forbidden');
 
 const getCards = (req, res) => {
   Card.find({})
@@ -28,19 +29,28 @@ const createCard = (req, res, next) => {
 };
 
 const deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.id)
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Карточка с указанным _id не найдена.');
-      } else {
-        res.status(200).send({ data: card });
-      }
+  Card.findById(req.params.id)
+    .orFail(() => {
+      throw new NotFoundError('Карточка с указанным _id не найдена.');
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new FaultRequest('Карточка с указанным _id не найдена.');
+    .then((card) => {
+      if (card.owner._id.toString() === req.user.id) {
+        Card.findByIdAndRemove(req.params.id)
+        // eslint-disable-next-line no-shadow
+          .then((card) => {
+            res.status(200).send({ data: card });
+          })
+          .catch((err) => {
+            if (err.name === 'CastError') {
+              throw new FaultRequest('Карточка с указанным _id не найдена.');
+            }
+            throw new InternalServerError(`Ошибка - ${err.message}`);
+          })
+          .catch(next);
+      } else {
+        throw new Forbidden('Недостаточно прав');
       }
-      throw new InternalServerError(`Ошибка - ${err.message}`);
+      return res.status(200).send({ message: 'Карточка удалена' });
     })
     .catch(next);
 };

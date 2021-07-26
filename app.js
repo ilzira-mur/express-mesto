@@ -6,6 +6,8 @@ const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const NotFoundError = require('./errors/NotFoundError');
+const { errorHandler } = require('./middlewares/errorHandler');
 
 const app = express();
 
@@ -26,19 +28,10 @@ app.use(authRouter);
 app.use(userRouter);
 app.use(cardRouter);
 
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res
-    .status(statusCode)
-    .send({
-      message: !message
-        ? 'На сервере произошла ошибка' : message,
-    });
-});
+app.use(errorHandler);
 
-router.use((req, res) => {
-  res.status(404).send({ message: `По адресу ${req.path} ничего не найдено` });
+router.use((req) => {
+  throw new NotFoundError(`По адресу ${req.path} ничего не найдено`);
 });
 
 app.listen(PORT, () => {

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const isEmail = require('validator/lib/isEmail');
 const isStrongPassword = require('validator/lib/isStrongPassword');
+const isURL = require('validator/lib/isURL');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,10 +22,8 @@ const userSchema = new mongoose.Schema({
     minlength: 1,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     validate: {
-      validator(v) {
-        return v.match(/^(https?:\/\/)(www\.)?([\da-z-]+)\.([a-z.]{2,6})[\da-z-._~:?#[\]@!$&'()*+,;=/]*\/?#?$/);
-      },
-      message: 'Неправильная ссылка!',
+      validator: (url) => isURL(url),
+      message: 'Строка должна содержать ссылку',
     },
   },
   email: {
