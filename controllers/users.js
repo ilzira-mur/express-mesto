@@ -48,7 +48,7 @@ const createUser = (req, res, next) => {
   // eslint-disable-next-line consistent-return
     .then((user) => {
       if (user) {
-        throw new ConflicRequest('Пользователь с таким email есть в системе');
+        next(new ConflicRequest('Пользователь с таким email есть в системе'));
       }
 
       bcrypt.hash(password, 10)
@@ -111,7 +111,7 @@ const updateUserAvatar = (req, res, next) => {
     .catch(next);
 };
 
-const login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
     throw new FaultRequest('Email или пароль отсутсвует');
@@ -122,7 +122,7 @@ const login = (req, res) => {
   // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        throw new Unauthorized('Пользователя не существует');
+        next(new Unauthorized('Пользователя не существует'));
       }
       bcrypt.compare(password, user.password)
       // eslint-disable-next-line consistent-return

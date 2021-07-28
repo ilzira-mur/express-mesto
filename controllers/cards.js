@@ -42,7 +42,7 @@ const deleteCard = (req, res, next) => {
           })
           .catch((err) => {
             if (err.name === 'CastError') {
-              throw new FaultRequest('Карточка с указанным _id не найдена.');
+              throw new NotFoundError('Карточка с указанным _id не найдена.');
             }
             throw new InternalServerError(`Ошибка - ${err.message}`);
           })
@@ -70,7 +70,7 @@ const likeCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new FaultRequest('Переданы некорректные данные для постановки/снятии лайка.');
+        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
       }
       throw new InternalServerError(`Ошибка - ${err.message}`);
     })
@@ -91,7 +91,7 @@ const dislikeCard = (req, res, next) => {
   })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new FaultRequest('Переданы некорректные данные для постановки/снятии лайка.');
+        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
       }
       throw new InternalServerError(`Ошибка - ${err.message}`);
     })
