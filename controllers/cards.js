@@ -56,44 +56,49 @@ const deleteCard = (req, res, next) => {
 };
 
 const likeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.id,
-    { $addToSet: { likes: req.user._id } },
-    { new: true },
-  )
-    .then((card) => {
-      if (!card) {
-        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
-      } else {
-        res.status(200).send({ data: card });
-      }
+  Card.findById(req.params.id)
+    .orFail(() => {
+      throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
-      }
-      throw new InternalServerError(`Ошибка - ${err.message}`);
+    // eslint-disable-next-line no-unused-vars
+    .then((card) => {
+      Card.findByIdAndUpdate(
+        req.params.id,
+        { $addToSet: { likes: req.user } },
+        { new: true },
+      )
+        // eslint-disable-next-line no-shadow
+        .then((card) => res.status(200).send({ data: card }))
+        .catch((err) => {
+          if (err.name === 'CastError') {
+            throw new FaultRequest('Переданы некорректные данные для постановки/снятии лайка.');
+          }
+        })
+        .catch(next);
     })
     .catch(next);
 };
 
 const dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.id,
-    { $pull: { likes: req.user._id } },
-    { new: true },
-  ).then((card) => {
-    if (!card) {
+  Card.findById(req.params.id)
+    .orFail(() => {
       throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
-    } else {
-      res.status(200).send({ data: card });
-    }
-  })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new NotFoundError('Переданы некорректные данные для постановки/снятии лайка.');
-      }
-      throw new InternalServerError(`Ошибка - ${err.message}`);
+    })
+    // eslint-disable-next-line no-unused-vars
+    .then((card) => {
+      Card.findByIdAndUpdate(
+        req.params.id,
+        { $pull: { likes: req.user._id } },
+        { new: true },
+      )
+        // eslint-disable-next-line no-shadow
+        .then((card) => res.status(200).send({ data: card }))
+        .catch((err) => {
+          if (err.name === 'CastError') {
+            throw new FaultRequest('Переданы некорректные данные для постановки/снятии лайка.');
+          }
+        })
+        .catch(next);
     })
     .catch(next);
 };

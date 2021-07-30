@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const router = require('express').Router();
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth');
@@ -28,11 +27,9 @@ app.use(authRouter);
 app.use(userRouter);
 app.use(cardRouter);
 
-app.use(errorHandler);
+app.get('*', (req) => { throw new NotFoundError(`По адресу ${req.path} ничего не найдено`); });
 
-router.use((req) => {
-  throw new NotFoundError(`По адресу ${req.path} ничего не найдено`);
-});
+app.use(errorHandler);
 
 app.listen(PORT, () => {
 });
